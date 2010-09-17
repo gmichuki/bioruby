@@ -10,3 +10,5 @@ load Pathname.new(File.join(File.dirname(__FILE__), ['..'] * 4,
                             'bioruby_test_helper.rb')).cleanpath.to_s
 require 'test/unit'
 require 'bio/appl/bepipred/report'
+
+

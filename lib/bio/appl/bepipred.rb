@@ -15,7 +15,8 @@
 #   Improved method for predicting linear B-cell epitopes.
 #   Jens Erik Pontoppidan Larsen, Ole Lund and Morten Nielsen
 #   Immunome Research 2:2, 2006.
-
+require 'rubygems'
+require 'bio'
 require 'bio/command'
 require 'shellwords'
 
@@ -84,7 +85,7 @@ class Bepipred
  #executes bepipred when called localy
  #The input is a file name or a path to the file containing protein sequences in fasta format
  #This method does not work
- # There could be a bug in the way the cmd aregument is created.
+ # There could be a bug in the way the cmd argument is created.
  def exec_local(cmd)
    Bio::Command.query_command(cmd)
  end
