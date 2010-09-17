@@ -38,7 +38,7 @@ class Bepipred
   autoload :Report, 'bio/appl/bepipred/report'
   
   # Creates a new Bepipred execution wrapper object
-  def initialize(program='bepipred',score_threshold=0.35,file_name)
+  def initialize(file_name,program='bepipred',score_threshold=0.35)
     @program = program
     @score_threshold = score_threshold
     @file_name = file_name
