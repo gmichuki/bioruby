@@ -1126,7 +1126,7 @@ module Bio
         # * _score_: score (Float or nil)
         # * _strand_: strand (String or nil)
         # * _phase_: phase (Integer or nil)
-        # * _attributes_: attributes (Array or nil)
+        # * _attributes_: attributes (Hash or nil)
         def initialize(*arg)
           super(*arg)
         end
