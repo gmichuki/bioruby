@@ -42,6 +42,8 @@ class Bepipred
     @program = program
     @score_threshold = score_threshold
     @file_name = file_name
+    @result_list = ResultList.new()
+    self.parse(self.dummyload())
   end
   
   # name of the program ('bepipred' in UNIX/Linux)
@@ -52,6 +54,9 @@ class Bepipred
   
   # return the names of the input sequences
   attr_reader :sequence_names
+
+  # expose the internal datastructure so that it can be manipulated directly.
+  attr_accessor :result_list
   
   def sequence_names(file)
     sequence_names = []
@@ -77,15 +82,16 @@ class Bepipred
     exec_local(cmd)
   end  
   
-  # TODO create a parser class for the ouput
-  # parse_results
-  DATAPARSED = false
-  RESULTS = []
+  
 
+  # simple input collector used until final version is ready
   def dummyload()
     return `/home/kaal/work/ruby/bepipred-1.0b/bepipred </home/kaal/work/ruby/bepipred-1.0b/test/Pellequer.fsa`
   end
 
+  # A simplistic parser for parsing a "gff2 like" result that bepipred outputs,
+  # and turns it into the internal datastructure.
+  # Note: the output of bepipred of gff2 is not valid.
   def parse(input) 
     input.each do |line| 
       if (line != "" and not line.split[0] =~ /^\#.*/)
@@ -98,43 +104,50 @@ class Bepipred
           temp[6] = {'Note' => 'E'}
         end 
         # generate the result
-        RESULTS << [temp[0], temp[1], 'epitope', temp[2].to_i, temp[3].to_i, temp[4].to_f, nil, nil, temp[6]]
+        @result_list << [temp[0], temp[1], 'epitope', temp[2].to_i, temp[3].to_i, temp[4].to_f, nil, nil, temp[6]]
       end
     end
   end
 
-
+  # simple wrapper method that enables operation on the main bepipred class
   def to_gff3()
-    # Delayed loading and parsing to limit resource-useage
-    if not DATAPARSED
-      parse(dummyload())
-    end
-
-    container = Bio::GFF::GFF3.new()
-
-    # Find unique sequence identifiers.
-    sequence_names = []
-    RESULTS.each { |x|
-      if (sequence_names[sequence_names.length-1] != x[0])
-        sequence_names << x[0]
-      end
-    }
-
-    # Create sequence regions for each sequence identifier
-    sequence_names.each { |seq| 
-      subinput = RESULTS.find_all {|rec| rec[0]==seq}
-      min = subinput.min_by {|x| x[3]}
-      max = subinput.max_by {|x| x[4]}
-      container.sequence_regions << Bio::GFF::GFF3::SequenceRegion.new(seq, min[3], max[4])
-    }
-
-    # Lets generate the individual records for the GFF3 output
-    RESULTS.each { |x|
-      container.records << Bio::GFF::GFF3::Record.new(*x)
-    }
-
-    return container.to_s()
+    return @result_list.to_gff3()
   end
+
+
+  # Result class representing the internal datastructure.
+  class ResultList < Array
+    # convert the internal datastructure into GFF3 valid format - using bioruby's gff3 functionality
+    def to_gff3()
+      container = Bio::GFF::GFF3.new()
+
+      # Find unique sequence identifiers.
+      sequence_names = []
+      self.each { |x|
+        if (sequence_names[sequence_names.length-1] != x[0])
+          sequence_names << x[0]
+        end
+      }
+      
+      # Create sequence regions for each sequence identifier
+      sequence_names.each { |seq| 
+        subinput = self.find_all {|rec| rec[0]==seq}
+        min = subinput.min_by {|x| x[3]}
+        max = subinput.max_by {|x| x[4]}
+        container.sequence_regions << Bio::GFF::GFF3::SequenceRegion.new(seq, min[3], max[4])
+      }
+
+      # Lets generate the individual records for the GFF3 output
+      self.each { |x|
+        container.records << Bio::GFF::GFF3::Record.new(*x)
+      }
+      
+      return container.to_s()
+    end
+  end
+
+
+
 
   
  private
