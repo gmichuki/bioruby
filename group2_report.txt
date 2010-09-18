@@ -1,0 +1,12 @@
+Task 2 achievement 
+The task involved creating a bioruby class to extract information from a fasta file input that has been used by bepipred. The information collected by the class includes: sequence/s ID, Description, Length, sequence and number of sequences in the fasta file.
+
+The importance of the extracted information is that:
+
+1.  You can be able to associate the length of the sequence in relation to the number of epitopes
+2.  You can quickly in glance know the number of sequences analysed
+3.  You can easily obtain the actual sequence for ease of manipulation with other software that only require sequence in put without the inclusion of sequence details.  eg. T-coffee
+
+The task though did not have much of a direct biological application.
+
+
