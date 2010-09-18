@@ -110,9 +110,21 @@ class Bepipred
     end
   end
 
+
   # simple wrapper method that enables operation on the main bepipred class
   def to_gff3()
     return @result_list.to_gff3()
+  end
+
+  # return a ResultList containing only the results (epitopes) that are above the threshold
+  def relevant_epitopes() 
+    dataSet = Bio::Bepipred::ResultList.new()
+    @result_list.each do |res|
+      if (res[8] != nil)
+        dataSet << res
+      end
+    end
+    return dataSet
   end
 
 
