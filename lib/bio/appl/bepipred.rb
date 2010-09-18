@@ -87,7 +87,7 @@ class Bepipred
 
   # simple input collector used until final version is ready
   def dummyload()
-    return `/home/kaal/work/ruby/bepipred-1.0b/bepipred </home/kaal/work/ruby/bepipred-1.0b/test/Pellequer.fsa`
+    return `/home/kaal/work/ruby/bepipred-1.0b/bepipred </home/kaal/work/ruby/bepipred-1.0b/test/CHO.fsa`
   end
 
   # A simplistic parser for parsing a "gff2 like" result that bepipred outputs,
@@ -127,6 +127,40 @@ class Bepipred
     return dataSet
   end
 
+  # returns a ResultList containing a summary of the input
+  def summary()
+    dataSet = Bio::Bepipred::ResultList.new()
+    data = self.relevant_epitopes()
+
+    last = nil
+    lastId = nil
+    lastPosition = 0
+    firstPosition = 0
+    sum = 0
+    data.each do |line|
+      if line[0] != lastId or line[3]!=lastPosition+1
+        if lastId != nil
+          # save/create summaryline
+          average = ((1000 * sum / (lastPosition - firstPosition)).to_i).to_f/1000
+          dataSet << [lastId, line[1], line[2], firstPosition, lastPosition, average, nil, nil, line[8]]
+        end
+        #ok new id - reset/set variables
+        lastId = line[0]
+        firstPosition = line[3]
+        sum = line[5]
+      end
+      #set last pos
+      lastPosition = line[4]
+      sum += line[5]
+    end
+
+    if lastId != nil
+      # save the last one
+      average = ((1000 * sum / (lastPosition - firstPosition)).to_i).to_f/1000
+      dataSet << [lastId, "bepipred-1.0b", "epitope", firstPosition, lastPosition, average, nil, nil, { 'Note' => 'E' }]
+    end
+    return dataSet
+  end
 
   # Result class representing the internal datastructure.
   class ResultList < Array
